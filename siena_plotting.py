@@ -26,7 +26,23 @@ grid()
 ax.axhline(y=0, color='b')
 plt.xlabel('Mse Pairs Through Time')
 plt.ylabel('Percentage of Brain Volume Change')
+#plt.hold(True)
 plt.show()
+
+I = 100
+brain_volume = []
+brain_volume.append(I)
+for i in range(len(PBVC_list)):
+    I = I * (1 + PBVC_list[i]/100)
+    brain_volume.append(I)
+print(brain_volume)
+
+x_axis = list(range(1, len(lines)+2))
+plt.plot(x_axis, brain_volume, 'r--')
+grid()
+fig.tight_layout()
+plt.show()
+
 
 """
 #matplotlib inline
