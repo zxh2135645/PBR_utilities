@@ -60,6 +60,7 @@ ax1.tick_params('y', colors = 'r')
 
 fig.tight_layout()
 plt.show()
+fig.savefig('./ms1244_plot.png')
 
 
 """
