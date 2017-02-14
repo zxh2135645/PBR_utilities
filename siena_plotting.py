@@ -5,6 +5,7 @@ author: James Zhang
 import matplotlib.pyplot as plt
 from math import floor, ceil
 from matplotlib.pyplot import grid
+import numpy as np
 
 
 f = open('/Users/jameszhang/PBR_utilities/PBVC.txt')
@@ -17,17 +18,6 @@ for idx in lines:
     PBVC_list.append(float(element[1]))
     
 print(PBVC_list)
-    
-x_axis = list(range(1, len(lines)+1))
-fig, ax = plt.subplots()
-ax.plot(x_axis, PBVC_list, 'ro')
-ax.axis([0, len(lines)+2, floor(min(PBVC_list)), ceil(max(PBVC_list))])
-grid()
-ax.axhline(y=0, color='b')
-plt.xlabel('Mse Pairs Through Time')
-plt.ylabel('Percentage of Brain Volume Change')
-#plt.hold(True)
-plt.show()
 
 I = 100
 brain_volume = []
@@ -37,9 +27,37 @@ for i in range(len(PBVC_list)):
     brain_volume.append(I)
 print(brain_volume)
 
-x_axis = list(range(1, len(lines)+2))
-plt.plot(x_axis, brain_volume, 'r--')
+# Plotting
+    
+x_axis = list(range(1, len(lines)+1))
+fig, ax = plt.subplots()
+ax.plot(x_axis, PBVC_list, 'bx', linewidth = 2, markeredgewidth = 2)
+ax.axis([0, len(lines)+2, floor(min(PBVC_list)), ceil(max(PBVC_list))])
 grid()
+ax.axhline(y=0, color='b', linestyle = '--')
+ax.set_xlabel('Mse Pairs Through Time')
+ax.set_ylabel('Percentage of Brain Volume Change', color = 'b')
+ax.tick_params('y', colors = 'b')
+
+# Add trend line
+z = np.polyfit(x_axis, PBVC_list, 1)
+p = np.poly1d(z)
+ax.plot(x_axis, p(x_axis), 'b-', linewidth = 1.5)
+# the line equation
+print("y = %.6fx + (%.6f)" %(z[0], z[1]))
+
+if z[1] >= 0:
+    ax.text(len(lines)/2 - 1, -0.5, "y = %.4fx + %.4f" %(z[0], z[1]))
+else:
+    ax.text(len(lines) / 2 - 1, -0.5, "y = %.4fx - %.4f" % (z[0], np.abs(z[1])))
+
+# Hold on
+x_axis = list(range(1, len(lines)+2))
+ax1 = ax.twinx()
+ax1.plot(x_axis, brain_volume, 'r-', linewidth = 2)
+ax1.set_ylabel('Brain Volume Change', color = 'r')
+ax1.tick_params('y', colors = 'r')
+
 fig.tight_layout()
 plt.show()
 
