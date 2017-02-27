@@ -8,11 +8,14 @@ Created on Thu Feb  9 01:46:26 2017
 
 import urllib.request
 import os
+from nipype.interfaces.base import isdefined
 
 
-def retri(msid, mseid1, mseid2): #pathname is 
+def retri(msid, mseid1, mseid2, bet_thresh): #pathname is
+    if not isdefined(bet_thresh):
+        bet_thresh = ''
     for i in range(len(mseid1)):
-        pathname = os.path.join('file:///data/henry7/PBR/subjects/', msid, 'siena', mseid1[i]+'__'+mseid2[i], 'report.html')
+        pathname = os.path.join('file:///data/henry7/PBR/subjects/', msid, 'siena', mseid1[i]+'__'+mseid2[i]+bet_thresh, 'report.html')
         #msid is str, mseid1 and mseid2 are list
         response = urllib.request.urlopen(pathname)
         #'file:///data/henry7/PBR/subjects/ms1244/siena/mse2439__mse3622/report.html'
@@ -32,7 +35,7 @@ def retri(msid, mseid1, mseid2): #pathname is
         PBVC = PBVC_pre.split('<')[0] 
         print(word, PBVC)    
     
-        text_folder = os.path.join('/data/henry7/PBR/subjects/', msid, 'siena', 'PBVC.txt')
+        text_folder = os.path.join('/data/henry7/PBR/subjects/', msid, 'siena', 'PBVC.txt'+bet_thresh)
         text_file = open(text_folder, 'w+')
         mseids = mseid1[i]+'__'+mseid2[i]
         text_file.write("{0} {1} \r\n".format(mseids, float(PBVC)))

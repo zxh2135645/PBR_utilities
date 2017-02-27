@@ -11,6 +11,7 @@ import os
 import sys
 from subprocess import run
 import urllib.request
+from siena_plotting import siena_plotting
 
 """
 def pairwise(iterable):
@@ -96,17 +97,19 @@ if __name__ == '__main__':
     mseid2 = get_mseidList(pair_list, 1)
     print("mseID1 is: ", mseid1,"\n")
     print("mseID2 is: ", mseid2,"\n")
-    
-    
+
+    """
     for cmd_line in pair_list:
         print("sinea", cmd_line[0], cmd_line[1])
         run(['pbr', cmd_line[0], cmd_line[1], '-w', 'siena', '-R'])
         print("Outputs are at /data/henry7/PBR/subjects/<msID>/siena/mseID1__mseID2/")
- 
-    retri(msid, mseid1, mseid2)
-        
-    
-        
-        
-    
-    
+    """
+    bet_thresh = '_0.6'
+    retri(msid, mseid1, mseid2, bet_thresh)
+
+    """
+    PBVC_dir = os.path.join('/data/henry7/PBR/subjects', msid, 'siena')
+    siena_plotting(PBVC_dir, msid)
+    """
+
+
