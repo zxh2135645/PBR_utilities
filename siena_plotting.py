@@ -7,9 +7,10 @@ from math import floor, ceil
 from matplotlib.pyplot import grid, savefig
 import numpy as np
 import os
+import sys
 
-def siena_plotting(pbvc_dir, msid):
-    f = open(os.path.join(pbvc_dir, 'PBVC.txt'))
+def siena_plotting(pbvc_dir, msid, bet_thresh=''):
+    f = open(os.path.join(pbvc_dir, 'PBVC'+bet_thresh+'.txt'))
     lines = f.readlines()
     print(lines)
     f.close()
@@ -73,7 +74,7 @@ def siena_plotting(pbvc_dir, msid):
     ax1.set_ylabel('Brain Volume Change', color = 'r')
     ax1.tick_params('y', colors = 'r')
 
-    savefig(os.path.join(pbvc_dir, msid+'_plot.png'))
+    savefig(os.path.join(pbvc_dir, msid+'_plot'+bet_thresh+'.png'))
 
     return None
 
@@ -113,6 +114,8 @@ ax.axvline(x=0, color='k')
 plt.show()
 """
 
+if __name__ == '__main__':
+    print("Argument List:", str(sys.argv), "\n")
 
 
 

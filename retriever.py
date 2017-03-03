@@ -35,7 +35,7 @@ def retri(msid, mseid1, mseid2, bet_thresh): #pathname is
         PBVC = PBVC_pre.split('<')[0] 
         print(word, PBVC)    
     
-        text_folder = os.path.join('/data/henry7/PBR/subjects/', msid, 'siena', 'PBVC.txt'+bet_thresh)
+        text_folder = os.path.join('/data/henry7/PBR/subjects/', msid, 'siena', 'PBVC'+bet_thresh+'.txt')
         text_file = open(text_folder, 'w+')
         mseids = mseid1[i]+'__'+mseid2[i]
         text_file.write("{0} {1} \r\n".format(mseids, float(PBVC)))
