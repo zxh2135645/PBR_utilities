@@ -78,6 +78,6 @@ if __name__ == '__main__':
         bet_thresh = sys.argv[2]
         print("bet_thresh is: ", bet_thresh)
 
-    PBVC_dir = os.path.join('/data/henry7/PBR/subjects', msid, 'pbr_siena')
+    PBVC_dir = os.path.join('/data/henry7/PBR/subjects', msid, 'pbr_siena2')
     siena_plotting(PBVC_dir, msid)
 
