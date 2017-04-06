@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 seriesDesc = get_modality(mse, "T1")
                 print(seriesDesc["nii"], mse)
                 if seriesDesc["nii"].any():
-                    f.write(mse, "\n")
+                    f.write(mse)
 
 
 
