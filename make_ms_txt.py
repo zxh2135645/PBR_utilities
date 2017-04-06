@@ -54,12 +54,13 @@ if __name__ == '__main__':
     for msid in msid_set_sorted:
         msid = msid.replace('ms', '')
         print(msid)
-        out_filename = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/ms' + msid + '.txt'
+        out_filename = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/' + msid + '.txt'
         mse_df = get_all_mse(msid)
         print(mse_df.mse)
         with open(out_filename, 'w') as f:
             for mse in mse_df.mse:
                 seriesDesc = get_modality(mse, "T1")
+                print(seriesDesc["nii"])
                 if mse in seriesDesc["nii"]:
                     f.write(mse, "\n")
 
