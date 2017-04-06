@@ -24,7 +24,7 @@ def get_all_mse(msid):
     return tmp
 
 def get_modality(mse, nii_type="T1"):
-    output = pd.DataFrame()
+    output = pd.DataFrame(index=None)
     num = mse.split("mse")[-1]
     cmd = ["ms_dcm_exam_info", "-t", num]
     proc = Popen(cmd, stdout=PIPE)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
             mse_list = mse_df.mse
             for mse in mse_list:
                 seriesDesc = get_modality(mse, "T1")
-                print(seriesDesc["nii"])
+                print(seriesDesc["nii"], mse)
                 if seriesDesc["nii"].any():
                     f.write(mse, "\n")
 
