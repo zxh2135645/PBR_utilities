@@ -62,9 +62,7 @@ if __name__ == '__main__':
             for mse in mse_list:
                 seriesDesc = get_modality(mse, "T1")
                 print(seriesDesc["nii"])
-                if not seriesDesc["nii"]:
-                    pass
-                else:
+                if seriesDesc["nii"].any():
                     f.write(mse, "\n")
 
 
