@@ -52,16 +52,18 @@ if __name__ == '__main__':
     print("There are {} msid patient will be tested". format(len(msid_set_sorted)))
 
     for msid in msid_set_sorted:
-        msid = msid.replace('ms', '')
+        # msid = msid.replace('ms', '')
         print(msid)
-        out_filename = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/' + msid + '.txt'
+        out_filename = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/test/' + msid + '.txt'
         mse_df = get_all_mse(msid)
         print(mse_df.mse)
         with open(out_filename, 'w') as f:
-            for mse in mse_df.mse:
+            mse_list = mse_df.mse
+            print(mse_list)
+            for mse in mse_list:
                 seriesDesc = get_modality(mse, "T1")
                 print(seriesDesc["nii"])
-                if mse in seriesDesc["nii"]:
+                if seriesDesc["nii"]:
                     f.write(mse, "\n")
 
 
