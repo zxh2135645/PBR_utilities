@@ -59,11 +59,12 @@ if __name__ == '__main__':
         print(mse_df.mse)
         with open(out_filename, 'w') as f:
             mse_list = mse_df.mse
-            print(mse_list)
             for mse in mse_list:
                 seriesDesc = get_modality(mse, "T1")
                 print(seriesDesc["nii"])
-                if seriesDesc["nii"]:
+                if not seriesDesc["nii"]:
+                    pass
+                else:
                     f.write(mse, "\n")
 
 
