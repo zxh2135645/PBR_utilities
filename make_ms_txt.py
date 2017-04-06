@@ -18,7 +18,7 @@ def get_all_mse(msid):
     cmd = ["ms_get_patient_imaging_exams", "--patient_id", get_numerical_msid(msid)]
     proc = Popen(cmd, stdout=PIPE)
     lines = [l.decode("utf-8").split() for l in proc.stdout.readlines()[5:]]
-    tmp = pd.DataFrame(lines, columns=["mse"])
+    tmp = pd.DataFrame(lines, columns=["mse", "date"])
     tmp["mse"] = "mse"+tmp.mse
     tmp["msid"] = msid
     return tmp
