@@ -123,9 +123,9 @@ def test_mapnode(config, moving_image, fixed_image):
 
     def getsubs(moving_image, fixed_image, moving_mse, fixed_mse):
         N = len(moving_image) * len(fixed_image)
-        subs = []
+        subs = [('_flirt', '_trans')]
         if N == 1:
-            subs = [('_FLIRT_RIGID%d'%0, moving_mse + '__' + fixed_mse)]
+            subs += [('_FLIRT_RIGID%d'%0, moving_mse + '__' + fixed_mse)]
         else:
             for i in range(N):
                 subs += [('_FLIRT_RIGID%d'%i, moving_mse + '__' + fixed_mse + '_' + str(i+1))]
