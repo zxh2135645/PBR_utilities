@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
         for mse_idx, mse in enumerate(f_reversed[0]):
             lst_edit_check = glob(os.path.join(config["output_directory"], mse, 'mindcontrol', '*FLAIR*',
-                                                      'lst', 'lst_edits', 'no_FP_filled_FN*'))
+                                                      'lst', 'lst_edits', 'no_FP_filled_FN_dr2*'))
             if len(lst_edit_check) == 1:
                 print("One lst edits of {0} is found in {1} ". format(msid, mse))
                 check['exist'][msid] = mse
