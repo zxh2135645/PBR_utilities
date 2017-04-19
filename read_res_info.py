@@ -30,16 +30,25 @@ def convert_to_coordinate(xyz):
     z_new = z # The slice don't change
 
     x_new = (x - x_pix_fov/2) * x_res
-    y_new = (y - y_pix_fov/2) * y_res
+    y_new = (y_pix_fov/2 - y) * y_res
 
     return [x_new, y_new, z_new]
 
 if __name__ == '__main__':
-    centroids = load_json('/data/henry7/james/Jim6/mse5466_centroids.json')['reference']['present']
+    working_dir = '/data/henry7/james/Jim6'
+    centroids = load_json(os.path.join(working_dir, 'mse5466_centroids.json'))['reference']['present']
     new_coord = []
-    for key, value in centroids.items():
-        print(key, value)
-        new_coord.append(convert_to_coordinate(value))
+    with open(os.path.join(working_dir, 'mse5466_write.roi'), 'w') as f:
+        for key, value in centroids.items():
+            print(key, value)
+            new_xyz = convert_to_coordinate(value)
+            new_coord.append(new_xyz)
+            f.writelines(["Begin Marker ROI\n",
+                          "  Slice={}\n".format(new_xyz[2]),
+                          "  Begin Shape\n",
+                          "    X={0}; Y={1}\n".format(new_xyz[0], new_xyz[1]),
+                          "  End Shape\n",
+                          "End Marker ROI\n"])
 
     print(new_coord)
 
