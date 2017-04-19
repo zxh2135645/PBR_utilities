@@ -30,7 +30,7 @@ def get_config():
 
 if __name__ == '__main__':
     config = get_config()
-    df = pd.read_csv("/home/sf522915/antje_transition_cohort.csv")
+    df = pd.read_csv("/data/henry7/james/antje_cohort/antje_transition_cohort.csv")
     msid_sorted = sorted(list(set(df['msid'])))
     print("msid scanned are :", msid_sorted, '\nThere are {} mse'.format(len(msid_sorted)))
     # print(df[['msid', 'mse']])

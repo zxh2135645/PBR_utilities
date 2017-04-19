@@ -46,7 +46,7 @@ def filter_files(descrip,nii_type, heuristic):
     return output
 
 if __name__ == '__main__':
-    df = pd.read_csv("/home/sf522915/antje_transition_cohort.csv")
+    df = pd.read_csv("/data/henry7/james/antje_cohort/antje_transition_cohort.csv")
     msid_set = set(df['msid'])
     msid_set_sorted = sorted(list(msid_set))
     print("There are {} msid patient will be tested". format(len(msid_set_sorted)))

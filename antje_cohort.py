@@ -31,7 +31,7 @@ def get_config():
 
 if __name__ == '__main__':
     config = get_config()
-    df = pd.read_csv("/home/sf522915/antje_transition_cohort.csv")
+    df = pd.read_csv("/data/henry7/james/antje_cohort/antje_transition_cohort.csv")
     msid_set = set(df['msid'])
     msid_set_sorted = sorted(list(msid_set))
     print("msid scanned are :", msid_set_sorted)
