@@ -29,8 +29,10 @@ def convert_to_coordinate(xyz):
 
     z_new = z # The slice don't change
 
-    x_new = (x - x_pix_fov/2) * x_res
-    y_new = (y_pix_fov/2 - y) * y_res
+    x_new = (x - x_pix_fov/2) * x_res + 0.5
+    y_new = (y_pix_fov/2 - y) * y_res - 0.5
+    # for [70, 152, 75] now x = -18, y = -32
+    # But it's actually around x = -17.5, y = -33.5 or -32.5
 
     return [x_new, y_new, z_new]
 
