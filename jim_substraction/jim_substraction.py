@@ -14,8 +14,10 @@ def create_status(config, msid, mseIDs):
     outputs = {}
     outputs["mseIDs"] = mseIDs
     outputs["fixed_corrected"] = sorted(glob(join(config["james_output_dir"], msid, 'substraction', 'mse*-mse*',                                                  '*_corrected.nii.gz')))
-    outputs["substracted_image"] = sorted(glob(join(config["james_output_dir"], msid, 'substraction', 'mse*-mse*',
-'fixed-warped.nii.gz')))
+    outputs["substracted_header"] = sorted(glob(join(config["james_output_dir"], msid, 'substraction', 'mse*-mse*',
+                                                     'fixed-warped.hdr')))
+    outputs["substracted_img"] = sorted(glob(join(config["james_output_dir"], msid, 'substraction', 'mse*-mse*',
+                                                     'fixed-warped.img')))
 
     return outputs
 
