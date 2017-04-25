@@ -21,10 +21,11 @@ def get_config():
 
 def run_algebra(var, formula, image1, image2, out_image):
     from subprocess import Popen, run, PIPE
+    print("In algebra, the output image is: ", out_image)
     cmd = ['Algebra', '-v', var, formula, image1, image2, out_image]
     run(cmd)
 
-    return out_image + '.hdr'
+    return out_image
 
 def run_unicorr(inputImage, outputImage):
     from subprocess import run
@@ -34,11 +35,15 @@ def run_unicorr(inputImage, outputImage):
     return outputImage
 
 def get_msid(name):
-    msid = name.split("/")[-1].split('-')[0]
+    msid = name.split("/")[-4]
     return msid
 
-def get_mseid(str1):
-    mseid1 = str1.split("/")[-1].split('-')[1]
+def get_fixed_mseid(str1):
+    mseid1 = str1.split("/")[-1].split('_')[0]
+    return mseid1
+
+def get_warped_mseid(str1):
+    mseid1 = str1.split("/")[-2].split('__')[0]
     return mseid1
 
 def create_jim_workflow(config, fixed, warped):
@@ -63,8 +68,8 @@ def create_jim_workflow(config, fixed, warped):
     from nipype.utils.filemanip import load_json
     import os
 
-    mse_tp1 = get_mseid(warped)
-    mse_tp2 = get_mseid(fixed)
+    mse_tp1 = get_warped_mseid(warped)
+    mse_tp2 = get_fixed_mseid(fixed)
     msid = get_msid(fixed)
     Jim_node = "Jim_substract_{0}_{1}-{2}".format(msid, mse_tp2, mse_tp1)
     register = Workflow(name=Jim_node)
@@ -74,7 +79,7 @@ def create_jim_workflow(config, fixed, warped):
     inputnode.inputs.moving_image = warped
     inputnode.inputs.fixed_image = fixed
 
-    unicorr = Node(Function(input_name=['inputImage', 'outputImage'], output_names=['uni_output'],
+    unicorr = Node(Function(input_names=['inputImage', 'outputImage'], output_names=['uni_output'],
                             function=run_unicorr), name='Unicorr')
     unicorr.inputs.outputImage = os.path.join(config["working_directory"], Jim_node, 'Unicorr',
                                               os.path.split(fixed)[1].split('.')[0] + '_corrected.nii.gz')

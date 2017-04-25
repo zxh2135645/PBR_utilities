@@ -1,12 +1,15 @@
 __author__ = 'sf713420'
 
-from .utils import get_msid, get_config, get_mseid, create_jim_workflow
-from glob import glob
 import os
+#PACKAGE_PARENT = '..'
+#SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+#sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+from .utils import get_config, create_jim_workflow
+from glob import glob
 from nipype.utils.filemanip import split_filename, load_json, save_json
-import sys
 
-def create_status(msid, mseIDs):
+
+def create_status(config, msid, mseIDs):
     from os.path import join
     outputs = {}
     outputs["mseIDs"] = mseIDs
@@ -17,18 +20,19 @@ def create_status(msid, mseIDs):
     return outputs
 
 
-
-if __name__ =='__main__':
+def run_workflow(msid):
     print("jim_substraction msID [-o <output directory>]")
     config = get_config()
-    msid = sys.argv[1]
+    # msid = sys.argv[1]
     print("msID is: ", msid, "\n")
 
+    """
     # This is not implemented so far
     #TODO
     if sys.argv.__len__() == 4:
         out_dir = sys.argv[3]
         print("Output directory is: ", out_dir)
+    """
 
     status = load_json(os.path.join(config["output_directory"], msid, 't1Ants_reg_long', 'status.json'))
     fixed_list = status["fixed_image"]
@@ -39,6 +43,7 @@ if __name__ =='__main__':
         raise NotImplementedError("The script assuming the list is one dimension, please modify it")
 
     for i, fixed in enumerate(fixed_list):
+        print(fixed, warped_list[i])
         wf = create_jim_workflow(config,
                                  fixed,
                                  warped_list[i])
@@ -47,8 +52,8 @@ if __name__ =='__main__':
                                                                  os.path.split(fixed)[1][0:-7]
                                                                  + '-'
                                                                  + os.path.split(warped_list[i])[1][0:-7],
-                                                                 + 'jim_substraction')}}
+                                                                 'jim_substraction')}}
         wf.run()
 
-    outputs = create_status(msid, mseIDs)
+    outputs = create_status(config, msid, mseIDs)
     save_json(os.path.join(config["james_output_dir"], msid, 'substraction', 'status.json'), outputs)
