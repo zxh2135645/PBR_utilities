@@ -67,6 +67,7 @@ def create_jim_workflow(config, fixed, warped):
     import nipype.interfaces.fsl as fsl
     from nipype.utils.filemanip import load_json
     import os
+    from nipype.caching import Memory
 
     mse_tp1 = get_warped_mseid(warped)
     mse_tp2 = get_fixed_mseid(fixed)
@@ -104,6 +105,7 @@ def create_jim_workflow(config, fixed, warped):
     register.write_graph(graph2use='orig')
     register.config["Execution"] = {"keep_inputs": True, "remove_unnecessary_outputs": False}
 
+    #Memory.clear_previous_runs(register, warn=True)
     return register
 """
 if __name__ == '__main__':
