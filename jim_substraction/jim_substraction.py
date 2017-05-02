@@ -59,3 +59,4 @@ def run_workflow(msid):
 
     outputs = create_status(config, msid, mseIDs)
     save_json(os.path.join(config["james_output_dir"], msid, 'substraction', 'status.json'), outputs)
+    return None
