@@ -9,6 +9,6 @@ atlas = os.path.join(working_dir, 'ADNI_atlas')
 outdir = os.path.join(working_dir, 'test_subprocess')
 
 cmd = ['MONSTR.sh', '--t1', t1, '--ncpu', '12', '--atlasdir', atlas, '--natlas', '5', '--o', outdir, '--robust']
-# proc = Popen(cmd)
-# print(proc.args)
+#proc = Popen(cmd)
+#print(proc.args)
 run(cmd)
