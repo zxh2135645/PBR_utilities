@@ -13,17 +13,24 @@ def get_collection(port=3001):
     collection = db.subjects
     return collection, client
 
-def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_img="alignment"):
+def get_descrip_name(mse, meteor_port, entry_types=None):
     coll, cli = get_collection(meteor_port+1)
     finder = {"subject_id": mse}
     if entry_types is not None:
         finder["entry_type"] = {"$in": entry_types}
     entries = coll.find(finder)
+    name = ''
     for entry in entries:
         print(entry)
         if "name" in entry.keys():
             name = entry["name"]
             print("name is:", name)
+    return name
+
+def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_img="alignment"):
+    name = get_descrip_name(mse, meteor_port, entry_types)
+    if name == '':
+        raise ValueError("name is emptry!")
 
     folders = [split(q)[1] for q in glob(join(outdir, mse, "*"))]
     ratio_file = join(outdir, mse, type_of_img, name + ".nii.gz")
@@ -43,6 +50,14 @@ def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_im
         proc.wait()
 
     return name
+
+def edit_lst(mse, outdir, meteor_port, entry_types):
+    name = check_before_edit_lst(mse, outdir, meteor_port, entry_types)
+    for entry in entry_types:
+        cmd = ['edit_lst.py', '-e', entry, mse]
+        proc=Popen(cmd)
+        proc.wait() # TODO
+
 
 if __name__ == '__main__':
     outdir = '/data/henry7/PBR/subjects'
