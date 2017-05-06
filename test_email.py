@@ -2,13 +2,13 @@ __author__ = 'sf713420'
 
 import smtplib
 
-TO = 'zxh2135645@gmail.com'
+TO = '@gmail.com'
 SUBJECT = 'TEST MAIL'
 TEXT = 'Here is a message from python.'
 
 # Gmail Sign In
-gmail_sender = 'zxh2135645@gmail.com'
-gmail_passwd = 'jameszhang'
+gmail_sender = '@gmail.com'
+gmail_passwd = ''
 
 server = smtplib.SMTP('smtp.gmail.com', 587)
 server.ehlo()
