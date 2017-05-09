@@ -96,7 +96,7 @@ def create_jim_workflow(config, fixed, warped):
     register.connect(inputnode, 'moving_image', substract, 'image2')
 
     sinker = Node(DataSink(), name="sinker")
-    sinker.inputs.base_directory = os.path.join(config["james_output_dir"], msid, 'substraction')
+    sinker.inputs.base_directory = os.path.join(config["james_output_dir"], msid, 'affine_substraction')
     sinker.inputs.container = mse_tp2 + '-' + mse_tp1
 
     register.connect(unicorr, 'uni_output', sinker, '@corrected')

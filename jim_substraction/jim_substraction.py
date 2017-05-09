@@ -38,7 +38,8 @@ def run_workflow(msid):
 
     status = load_json(os.path.join(config["output_directory"], msid, 't1Ants_reg_long', 'status.json'))
     fixed_list = status["fixed_image"]
-    warped_list = status["warped_brain"]
+    # warped_list = status["warped_brain"]
+    warped_list = status["affined_brain"]
     mseIDs = status["mseIDs"]
 
     if len(fixed_list) + 1 != len(mseIDs) or len(warped_list) + 1 != len(mseIDs):
