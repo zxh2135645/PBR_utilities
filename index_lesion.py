@@ -35,7 +35,13 @@ def index_lesion_workflow(msid, mseid, lesion):
     sinker.inputs.base_directory = output_directory
     sinker.inputs.container = '.'
 
+    register.connect(bin_math, "out_file", cluster_lesion, "in_file")
     register.connect(cluster_lesion, "index_file", sinker, "@cluster")
+
+    from nipype.interfaces.freesurfer import SegStats
+    segstats_lesion = Node(SegStats(), name="segstats_lesion")
+    register.connect(cluster_lesion, "index_file", segstats_lesion, "segmentation_file")
+    register.connect(segstats_lesion, "summary_file", sinker, "@summaryfile")
 
     register.write_graph(graph2use = 'orig')
     register.config["Execution"] = {"keep_inputs": True, "remove_unnecessary_outputs": False}
