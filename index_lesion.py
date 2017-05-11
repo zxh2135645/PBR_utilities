@@ -34,6 +34,7 @@ def index_lesion_workflow(msid, mseid, lesion):
     sinker = Node(DataSink(), name="sinker")
     sinker.inputs.base_directory = output_directory
     sinker.inputs.container = '.'
+    sinker.inputs.substitutions = [('_maths', '')]
 
     register.connect(bin_math, "out_file", cluster_lesion, "in_file")
     register.connect(cluster_lesion, "index_file", sinker, "@cluster")
