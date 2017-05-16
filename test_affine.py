@@ -25,7 +25,7 @@ new_jcb_data = np.multiply(jcb_data, det)
 
 new_image = nib.Nifti1Image(new_jcb_data, affine=aff)
 outfile = '/data/henry7/james/subjects/ms776/affine_substraction/output_jacobian_scaled_affined.nii.gz'
-nib.save(new_image, outfile)
+# nib.save(new_image, outfile)
 
 """
 convertToAffineType = '/data/henry7/PBR/subjects/ms1244/t1Ants_reg_long/mse5466__mse3670/matrix_convertToAffineType.mat'
