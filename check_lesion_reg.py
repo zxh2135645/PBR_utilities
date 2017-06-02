@@ -39,7 +39,7 @@ def get_descrip_name(mse, meteor_port, entry_types=None):
 def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_img="alignment"):
     name, saved = get_descrip_name(mse, meteor_port, entry_types)
     if name == '':
-        raise ValueError("name is emptry!")
+        raise ValueError("name is empty!")
 
     folders = [split(q)[1] for q in glob(join(outdir, mse, "*"))]
     ratio_file = join(outdir, mse, type_of_img, name + ".nii.gz")
