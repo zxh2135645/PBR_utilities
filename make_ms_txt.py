@@ -46,15 +46,17 @@ def filter_files(descrip,nii_type, heuristic):
     return output
 
 if __name__ == '__main__':
-    df = pd.read_csv("/data/henry7/james/antje_cohort/antje_transition_cohort.csv")
-    msid_set = set(df['msid'])
+    #df = pd.read_csv("/data/henry7/james/antje_cohort/antje_transition_cohort.csv")
+    df = pd.read_csv("/data/henry7/james/all.csv")
+    #msid_set = set(df['msid'])
+    msid_set = set(df['MS Group Subject ID'])
     msid_set_sorted = sorted(list(msid_set))
     print("There are {} msid patient will be tested". format(len(msid_set_sorted)))
 
     for msid in msid_set_sorted:
-        # msid = msid.replace('ms', '')
+        msid = "ms" + msid
         print(msid)
-        out_filename = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/test/' + msid + '.txt'
+        out_filename = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/all/' + msid + '.txt'
         mse_df = get_all_mse(msid)
         print(mse_df.mse)
         with open(out_filename, 'w') as f:
