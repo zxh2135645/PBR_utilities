@@ -7,6 +7,7 @@ import os
 from subprocess import Popen, run, PIPE
 from pbr.config import config as cc
 
+
 def get_collection(port=3001):
     from pymongo import MongoClient
     client = MongoClient("localhost", port)
@@ -45,6 +46,7 @@ def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_im
     ratio_file = join(outdir, mse, type_of_img, name + ".nii.gz")
     assert os.path.exists(ratio_file), "{} file does not exist {}".format(type_of_img, ratio_file)
 
+    """
     if "antsCT" not in folders:
         print("There is no antsCT folder in /data/henry7/PBR/subjects/{0}"
               "\n pbr {0} -w ants -R will be run".format(mse))
@@ -55,6 +57,13 @@ def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_im
         print("There is no lst folder in /data/henry7/PBR/subjects/{0}"
         "\n pbr {0} -w lst -R will be run".format(mse))
         cmd = ['pbr', mse, '-w', 'lst', '-R']
+        proc = Popen(cmd)
+        proc.wait()
+    """
+    if "lesion_reg" not in folders:
+        print("There is no antsCT folder in /data/henry7/PBR/subjects/{0}"
+              "\n pbr {0} -w ants -R will be run".format(mse))
+        cmd = ['pbr', mse, '-w', 'transform', '-R']
         proc = Popen(cmd)
         proc.wait()
 
@@ -128,14 +137,71 @@ def email_to(to, subject, message):
     server.quit()
     return 1
 
+def get_msid(mseid):
+    from nipype.utils.filemanip import load_json
+    status = load_json(os.path.join(cc["output_directory"], mseid, 'alignment', 'status.json'))
+    t1_files = status["t1_files"]
+    if len(t1_files) == 0:
+        raise ValueError("No T1 file is found.")
+    elif len(t1_files) == 1:
+        t1_file = ''.join(t1_files)
+    else:
+        t1_file = t1_files[0]
+
+    msid = t1_file.split("/")[-1].split("-")[0]
+    return msid
+
+def get_mseid(msid, mse_reversed, lesion_mse):
+    from subprocess import call
+    lesion_idx = mse_reversed.index(lesion_mse)
+    mse_list1 = mse_reversed[:lesion_idx]
+    mse_list2 = mse_reversed[lesion_idx:].reverse()
+    mse_tp1 = ''
+    mse_tp2 = ''
+    # Exclude the lesion_mse
+
+    check_tlc = glob(os.path.join(cc["output_directory"], lesion_mse, 'tlc', 'status.json'))
+    if len(check_tlc) == 0:
+        print("No T1 lesions found in tlc folder, running pbr first...")
+        cmd = ['pbr', lesion_mse, '-w', 'tlc', '-R']
+        call(cmd)
+
+    print("searching for lesion_reg folder for registered lesions.")
+    for mse_idx, mse in enumerate(mse_list1):
+        check_lesion_reg = glob(os.path.join(cc["output_directory"], mse, 'lesion_reg', 'status.json'))
+        if mse != lesion_mse:
+            if len(check_lesion_reg) == 0:
+                mse_tp1 = mse_list1[mse_idx-1]
+                mse_tp2 = mse_list1[mse_idx]
+                break
+    if mse_tp1 is '' and mse_tp2 is '':
+        for mse_idx, mse in enumerate(mse_list2):
+            check_lesion_reg = glob(os.path.join(cc["output_directory"], mse, 'lesion_reg', 'status.json'))
+            if mse != lesion_mse:
+                if len(check_lesion_reg) == 0:
+                    mse_tp1 = mse_list2[mse_idx-1]
+                    mse_tp2 = mse_list2[mse_idx]
+                    break
+    if mse_tp1 is '' and mse_tp2 is '':
+        print("Congratulations! You finished this subject: ", msid)
+        # To add this info to a csv file
+        return mse_tp1, mse_tp2
+    else:
+        return mse_tp1, mse_tp2
+
+
 if __name__ == '__main__':
     import argparse
     import pandas as pd
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('msid', nargs="+")
+    parser.add_argument('mseid', nargs="+")
     args = parser.parse_args()
     msid = args.msid
     outdir = cc["output_directory"]
+    msid_str = ''.join(msid)
+    mseid = get_mseid(msid_str)
+
     #outdir should be PBROUT
 
     for ms in msid:
@@ -144,6 +210,55 @@ if __name__ == '__main__':
                                  header=None)
         f_reversed = fread.iloc[::-1]
         mse_reversed = list(f_reversed[0])
-        for i in range(len(mse_reversed)):
-            name = check_before_edit_lst('mse3670', outdir, 5050, entry_types=["transform"])
+        for mse_idx, mse in enumerate(mse_reversed):
+            lst_edit_check = glob(os.path.join(outdir, mse, 'mindcontrol', '*FLAIR*',
+                                               'lst', 'lst_edits', 'no_FP_filled_FN_dr2*'))
+            if len(lst_edit_check) == 1:
+                lesion_edit = ''.join(lst_edit_check)
+                break
+            elif len(lst_edit_check) > 1:
+                raise ValueError("lst_edits files have more than one inputs, please check PBROUT directory",
+                                 os.path.split(lst_edit_check[0]))
+
+            try:
+                lesion_edit
+            except NameError:
+                print("The edited FLAIR lesion is not found in any timepoints, please check the corresponding directory.")
+            mse_tp1, mse_tp2 = get_mseid(ms, mse_reversed, mse)
+            if mse_tp1 is not '' and mse_tp2 is not '':
+                if mse_tp1 != mse:
+                    check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
+                    run_pbr_apply_transform(mse_tp2)
+                    check_before_edit_lst(mse_tp2, outdir, 5050, entry_types=["transform"])
+                    mc_up(mse_tp2)
+                    print("Done!")
+
+
+
+
+"""
+            idx = mse_reversed.index(mseid)
+            len_mse_list = len(mse_reversed)
+            if mse != mseid:
+                if idx == len_mse_list - 1:
+                    print("Now it's transforming the base timepoint to the later timepoint")
+                    mse_tp1 = mse
+                    mse_tp2 = mse_reversed[mse_reversed.index(mseid) + 1]
+
+                elif idx == 0:
+                    print("Congrats! You finished running this subjects: ", msid)
+                    break
+                else:
+                    if idx < mse_idx:
+                        mse_tp1 = mseid
+                        mse_tp2 = mse_reversed[mse_reversed.index(mseid) - 1]
+                    elif idx > mse_idx:
+                        mse_tp1 = mseid
+                        mse_tp2 = mse_reversed[mse_reversed.index(mseid) + 1]
+            else:
+                print("This is the base timepoint. It's gonna apply to previous time point first")
+"""
+
+
+
 
