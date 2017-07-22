@@ -37,7 +37,7 @@ def get_descrip_name(mse, meteor_port, entry_types=None):
     return name, saved
 
 
-def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_img="alignment"):
+def check_before_mc_up(mse, outdir, meteor_port, entry_types=None, type_of_img="alignment", lesion_mse=None):
     name, saved = get_descrip_name(mse, meteor_port, entry_types)
     if name == '':
         raise ValueError("name is empty!")
@@ -46,27 +46,33 @@ def check_before_edit_lst(mse, outdir, meteor_port, entry_types=None, type_of_im
     ratio_file = join(outdir, mse, type_of_img, name + ".nii.gz")
     assert os.path.exists(ratio_file), "{} file does not exist {}".format(type_of_img, ratio_file)
 
-    """
-    if "antsCT" not in folders:
-        print("There is no antsCT folder in /data/henry7/PBR/subjects/{0}"
-              "\n pbr {0} -w ants -R will be run".format(mse))
-        cmd = ['pbr', mse, '-w', 'ants', '-R']
-        proc = Popen(cmd)
-        proc.wait()
-    if "lst" not in folders:
-        print("There is no lst folder in /data/henry7/PBR/subjects/{0}"
-        "\n pbr {0} -w lst -R will be run".format(mse))
-        cmd = ['pbr', mse, '-w', 'lst', '-R']
-        proc = Popen(cmd)
-        proc.wait()
-    """
-    if "lesion_reg" not in folders:
-        print("There is no antsCT folder in /data/henry7/PBR/subjects/{0}"
-              "\n pbr {0} -w ants -R will be run".format(mse))
-        cmd = ['pbr', mse, '-w', 'transform', '-R']
-        proc = Popen(cmd)
-        proc.wait()
+    if mse == lesion_mse:
+        if "antsCT" not in folders:
+            print("There is no antsCT folder in /data/henry7/PBR/subjects/{0}"
+                  "\n pbr {0} -w ants -R will be run".format(mse))
+            cmd = ['pbr', mse, '-w', 'ants', '-R']
+            proc = Popen(cmd)
+            proc.wait()
+        if "lst" not in folders:
+            print("There is no lst folder in /data/henry7/PBR/subjects/{0}"
+                  "\n pbr {0} -w lst -R will be run".format(mse))
+            cmd = ['pbr', mse, '-w', 'lst', '-R']
+            proc = Popen(cmd)
+            proc.wait()
 
+        if "lesion_reg" not in folders:
+            print("There is no lesion_reg folder in /data/henry7/PBR/subjects/{0}"
+                  "\n pbr {0} -w ants -R will be run".format(mse))
+            cmd = ['pbr', mse, '-w', 'transform', '-R']
+            proc = Popen(cmd)
+            proc.wait()
+    else:
+        if "lesion_reg" not in folders:
+            print("There is no lesion_reg folder in /data/henry7/PBR/subjects/{0}"
+                  "\n pbr {0} -w ants -R will be run".format(mse))
+            cmd = ['pbr', mse, '-w', 'transform', '-R']
+            proc = Popen(cmd)
+            proc.wait()
     return 1
 
 def edit_lst(mse, entry_types):
@@ -89,6 +95,7 @@ def check_after_edit_lesion(mse_tp1, mse_tp2, outdir, meteor_port, entry_types):
             prev_lesion = join(outdir, mse_tp1, "mindcontrol", name, entry, "lst_edits",
                                "no_FP_filled_FN_dr2_{}.nii.gz".format(name))
             dst_file = join(outdir, mse_tp2, "transforms", "prev_lesion.nii.gz")
+            print("Copying file from {0} to {1}".format(prev_lesion, dst_file))
             copyfile(prev_lesion, dst_file)
         elif "checked" in saved:
             print("The previous timepoint lesions were checked in the mindcontrol, \n"
@@ -154,8 +161,13 @@ def get_msid(mseid):
 def get_mseid(msid, mse_reversed, lesion_mse):
     from subprocess import call
     lesion_idx = mse_reversed.index(lesion_mse)
-    mse_list1 = mse_reversed[:lesion_idx]
-    mse_list2 = mse_reversed[lesion_idx:].reverse()
+    print("lesion_idx is:", lesion_idx)
+    mse_list1 = mse_reversed[lesion_idx:]
+    print("mse_list1 is:", mse_list1)
+    mse_list2_bc = mse_reversed[:lesion_idx]
+    mse_list2_bc.reverse()
+    mse_list2 = mse_list2_bc
+    print("mse_list2 is:", mse_list2)
     mse_tp1 = ''
     mse_tp2 = ''
     # Exclude the lesion_mse
@@ -174,7 +186,7 @@ def get_mseid(msid, mse_reversed, lesion_mse):
                 mse_tp1 = mse_list1[mse_idx-1]
                 mse_tp2 = mse_list1[mse_idx]
                 break
-    if mse_tp1 is '' and mse_tp2 is '':
+    if mse_tp1 is '' and mse_tp2 is '' and len(mse_list2) != 0:
         for mse_idx, mse in enumerate(mse_list2):
             check_lesion_reg = glob(os.path.join(cc["output_directory"], mse, 'lesion_reg', 'status.json'))
             if mse != lesion_mse:
@@ -185,9 +197,7 @@ def get_mseid(msid, mse_reversed, lesion_mse):
     if mse_tp1 is '' and mse_tp2 is '':
         print("Congratulations! You finished this subject: ", msid)
         # To add this info to a csv file
-        return mse_tp1, mse_tp2
-    else:
-        return mse_tp1, mse_tp2
+    return mse_tp1, mse_tp2
 
 
 if __name__ == '__main__':
@@ -195,12 +205,12 @@ if __name__ == '__main__':
     import pandas as pd
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('mseid', nargs="+")
+    parser.add_argument('msid', nargs="+")
     args = parser.parse_args()
     msid = args.msid
     outdir = cc["output_directory"]
-    msid_str = ''.join(msid)
-    mseid = get_mseid(msid_str)
+    print("msid is:", msid)
+
 
     #outdir should be PBROUT
 
@@ -210,6 +220,7 @@ if __name__ == '__main__':
                                  header=None)
         f_reversed = fread.iloc[::-1]
         mse_reversed = list(f_reversed[0])
+        print("mse list is:", mse_reversed)
         for mse_idx, mse in enumerate(mse_reversed):
             lst_edit_check = glob(os.path.join(outdir, mse, 'mindcontrol', '*FLAIR*',
                                                'lst', 'lst_edits', 'no_FP_filled_FN_dr2*'))
@@ -220,18 +231,27 @@ if __name__ == '__main__':
                 raise ValueError("lst_edits files have more than one inputs, please check PBROUT directory",
                                  os.path.split(lst_edit_check[0]))
 
-            try:
-                lesion_edit
-            except NameError:
-                print("The edited FLAIR lesion is not found in any timepoints, please check the corresponding directory.")
-            mse_tp1, mse_tp2 = get_mseid(ms, mse_reversed, mse)
-            if mse_tp1 is not '' and mse_tp2 is not '':
-                if mse_tp1 != mse:
-                    check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
-                    run_pbr_apply_transform(mse_tp2)
-                    check_before_edit_lst(mse_tp2, outdir, 5050, entry_types=["transform"])
-                    mc_up(mse_tp2)
-                    print("Done!")
+        try:
+            print("The path of lsf lesion folder is:", lesion_edit)
+            print("The lesion lst mse is:", mse)
+        except NameError:
+            print("The edited FLAIR lesion is not found in any timepoints, please check the corresponding directory.")
+        mse_tp1, mse_tp2 = get_mseid(ms, mse_reversed, mse)
+        if mse_tp1 is not '' and mse_tp2 is not '':
+            if mse_tp1 == mse:
+                check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
+                run_pbr_apply_transform(mse_tp2)
+                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
+                mc_up(mse_tp2)
+                print("Done!")
+            else:
+                check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
+                run_pbr_apply_transform(mse_tp2)
+                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
+                mc_up(mse_tp2)
+                print("Done!")
+        else:
+            print("Either mse_tp1 or mse_tp2 is empty, or both of them are empty:", mse_tp1, mse_tp2)
 
 
 
