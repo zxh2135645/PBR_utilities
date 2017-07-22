@@ -278,7 +278,3 @@ if __name__ == '__main__':
             else:
                 print("This is the base timepoint. It's gonna apply to previous time point first")
 """
-
-
-
-
