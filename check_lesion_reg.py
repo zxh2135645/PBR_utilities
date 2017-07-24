@@ -39,13 +39,13 @@ def get_descrip_name(mse, meteor_port, entry_types=None):
 
 
 def check_before_mc_up(mse, outdir, meteor_port, entry_types=None, type_of_img="alignment", lesion_mse=None):
-    name, saved = get_descrip_name(mse, meteor_port, entry_types)
-    if name == '':
-        raise ValueError("name is empty!")
+    #name, saved = get_descrip_name(mse, meteor_port, entry_types)
+    #if name == '':
+    #    raise ValueError("name is empty!")
 
     folders = [split(q)[1] for q in glob(join(outdir, mse, "*"))]
-    ratio_file = join(outdir, mse, type_of_img, name + ".nii.gz")
-    assert os.path.exists(ratio_file), "{} file does not exist {}".format(type_of_img, ratio_file)
+    #ratio_file = join(outdir, mse, type_of_img, name + ".nii.gz")
+    #assert os.path.exists(ratio_file), "{} file does not exist {}".format(type_of_img, ratio_file)
 
     if mse == lesion_mse:
         if "antsCT" not in folders:
@@ -264,13 +264,14 @@ if __name__ == '__main__':
             if mse_tp1 == mse:
                 check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["lst"])
                 run_pbr_apply_transform(mse_tp2)
-                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["lst"], lesion_mse=mse)
+                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["lst"], lesion_mse=mse) #
                 mc_up(mse_tp2)
                 print("Done!")
             else:
+                edit_lst(mse_tp1)
                 check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
                 run_pbr_apply_transform(mse_tp2)
-                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
+                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse) #
                 mc_up(mse_tp2)
                 print("Done!")
         else:
