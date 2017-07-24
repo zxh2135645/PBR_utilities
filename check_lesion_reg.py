@@ -197,10 +197,7 @@ def get_mseid(msid, mse_reversed, lesion_mse):
             t1_name = split_filename(t1_file)[1]
             check_t1_lesion = glob(os.path.join(cc["output_directory"], mse, 'mindcontrol', t1_name, 'transform',
                                                 'lst_edit', 'no_FP_filled_FN_dr2*'))
-        if mse == lesion_mse:
-            mse_tp1 = mse_list1[mse_idx]
-            mse_tp2 = mse_list1[mse_idx+1]
-        else:
+        if mse != lesion_mse:
             if len(check_t1_lesion) == 0:
                 mse_tp1 = mse_list1[mse_idx-1]
                 mse_tp2 = mse_list1[mse_idx]
@@ -214,10 +211,7 @@ def get_mseid(msid, mse_reversed, lesion_mse):
             t1_name = split_filename(t1_file)[1]
             check_t1_lesion = glob(os.path.join(cc["output_directory"], mse, 'mindcontrol', t1_name, 'transform',
                                                 'lst_edit', 'no_FP_filled_FN_dr2*'))
-            if mse == lesion_mse:
-                mse_tp1 = mse_list2[mse_idx]
-                mse_tp2 = mse_list2[mse_idx+1]
-            else:
+            if mse != lesion_mse:
                 if len(check_t1_lesion) == 0:
                     mse_tp1 = mse_list2[mse_idx-1]
                     mse_tp2 = mse_list2[mse_idx]
@@ -267,11 +261,18 @@ if __name__ == '__main__':
         mse_tp1, mse_tp2 = get_mseid(ms, mse_reversed, mse)
         print("mse_tp1 and mse_tp2 are:", mse_tp1, mse_tp2)
         if mse_tp1 is not '' and mse_tp2 is not '':
-            check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
-            run_pbr_apply_transform(mse_tp2)
-            check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
-            mc_up(mse_tp2)
-            print("Done!")
+            if mse_tp1 == mse:
+                check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["lst"])
+                run_pbr_apply_transform(mse_tp2)
+                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["lst"], lesion_mse=mse)
+                mc_up(mse_tp2)
+                print("Done!")
+            else:
+                check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
+                run_pbr_apply_transform(mse_tp2)
+                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
+                mc_up(mse_tp2)
+                print("Done!")
         else:
             print("Either mse_tp1 or mse_tp2 is empty, or both of them are empty:", mse_tp1, mse_tp2)
 
