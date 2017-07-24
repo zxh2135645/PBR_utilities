@@ -6,6 +6,7 @@ from os.path import split, join
 import os
 from subprocess import Popen, run, PIPE
 from pbr.config import config as cc
+from nipype.utils.filemanip import load_json, split_filename
 
 
 def get_collection(port=3001):
@@ -117,6 +118,12 @@ def mc_up(mse_tp2):
     proc.wait()
     return 1
 
+def edit_lst(mse_tp1):
+    cmd = ['edit_lst.py', mse_tp1]
+    proc = Popen(cmd)
+    proc.wait()
+    return 1
+
 def email_to(to, subject, message):
     # to is string
     import smtplib
@@ -180,17 +187,38 @@ def get_mseid(msid, mse_reversed, lesion_mse):
 
     print("searching for lesion_reg folder for registered lesions.")
     for mse_idx, mse in enumerate(mse_list1):
-        check_lesion_reg = glob(os.path.join(cc["output_directory"], mse, 'lesion_reg', 'status.json'))
-        if mse != lesion_mse:
-            if len(check_lesion_reg) == 0:
+        if mse == lesion_mse:
+            check_t1_lesion = check_tlc
+        else:
+            t1_status = load_json(os.path.join(cc["output_directory"], mse, 'alignment', 'status.json'))
+            t1_files = t1_status["t1_files"]
+            assert len(t1_files) >= 1
+            t1_file = max(t1_files)
+            t1_name = split_filename(t1_file)[1]
+            check_t1_lesion = glob(os.path.join(cc["output_directory"], mse, 'mindcontrol', t1_name, 'transform',
+                                                'lst_edit', 'no_FP_filled_FN_dr2*'))
+        if mse == lesion_mse:
+            mse_tp1 = mse_list1[mse_idx]
+            mse_tp2 = mse_list1[mse_idx+1]
+        else:
+            if len(check_t1_lesion) == 0:
                 mse_tp1 = mse_list1[mse_idx-1]
                 mse_tp2 = mse_list1[mse_idx]
                 break
     if mse_tp1 is '' and mse_tp2 is '' and len(mse_list2) != 0:
         for mse_idx, mse in enumerate(mse_list2):
-            check_lesion_reg = glob(os.path.join(cc["output_directory"], mse, 'lesion_reg', 'status.json'))
-            if mse != lesion_mse:
-                if len(check_lesion_reg) == 0:
+            t1_status = load_json(os.path.join(cc["output_directory"], mse, 'alignment', 'status.json'))
+            t1_files = t1_status["t1_files"]
+            assert len(t1_files) >= 1
+            t1_file = max(t1_files)
+            t1_name = split_filename(t1_file)[1]
+            check_t1_lesion = glob(os.path.join(cc["output_directory"], mse, 'mindcontrol', t1_name, 'transform',
+                                                'lst_edit', 'no_FP_filled_FN_dr2*'))
+            if mse == lesion_mse:
+                mse_tp1 = mse_list2[mse_idx]
+                mse_tp2 = mse_list2[mse_idx+1]
+            else:
+                if len(check_t1_lesion) == 0:
                     mse_tp1 = mse_list2[mse_idx-1]
                     mse_tp2 = mse_list2[mse_idx]
                     break
@@ -237,19 +265,13 @@ if __name__ == '__main__':
         except NameError:
             print("The edited FLAIR lesion is not found in any timepoints, please check the corresponding directory.")
         mse_tp1, mse_tp2 = get_mseid(ms, mse_reversed, mse)
+        print("mse_tp1 and mse_tp2 are:", mse_tp1, mse_tp2)
         if mse_tp1 is not '' and mse_tp2 is not '':
-            if mse_tp1 == mse:
-                check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
-                run_pbr_apply_transform(mse_tp2)
-                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
-                mc_up(mse_tp2)
-                print("Done!")
-            else:
-                check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
-                run_pbr_apply_transform(mse_tp2)
-                check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
-                mc_up(mse_tp2)
-                print("Done!")
+            check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
+            run_pbr_apply_transform(mse_tp2)
+            check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse)
+            mc_up(mse_tp2)
+            print("Done!")
         else:
             print("Either mse_tp1 or mse_tp2 is empty, or both of them are empty:", mse_tp1, mse_tp2)
 
