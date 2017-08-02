@@ -84,12 +84,14 @@ def edit_lst(mse, entry_types):
         proc.wait() # TODO
     return 1
 
-def check_after_edit_lesion(mse_tp1, mse_tp2, outdir, meteor_port, entry_types):
+def check_after_edit_lesion(mse_tp1, mse_tp2, outdir, meteor_port, entry_types, status=None):
     import warnings
     from shutil import copyfile
     # After edit_lst, check if there is no_FP_filled_FN_dr2* generated
     if outdir != cc["output_directory"]:
         warnings.warn("The outdir is not PBROUT directory, please be careful")
+    if status is None:
+        raise ValueError("No status file is found, please check")
     name, saved = get_descrip_name(mse_tp1, meteor_port, entry_types)
     for entry in entry_types:
         if "logged" in saved:
@@ -237,6 +239,7 @@ if __name__ == '__main__':
     #outdir should be PBROUT
 
     for ms in msid:
+        status = pd.read_csv(os.path.join('/data/henry7/james/antje_cohort/', 'check_lesion_reg.csv'))
         text_file = '/data/henry6/mindcontrol_ucsf_env/watchlists/long/VEO/test/{}.txt'.format(ms)
         fread = pd.read_table(text_file,
                                  header=None)
@@ -257,6 +260,8 @@ if __name__ == '__main__':
             print("The path of lsf lesion folder is:", lesion_edit)
             print("The lesion lst mse is:", mse)
         except NameError:
+            status.loc[status['msid'] == ms, 'status'] = "No_FLAIR_Lesion"
+            status.to_csv(os.path.join('/data/henry7/james/antje_cohort/', 'check_lesion_reg.csv'))
             print("The edited FLAIR lesion is not found in any timepoints, please check the corresponding directory.")
         mse_tp1, mse_tp2 = get_mseid(ms, mse_reversed, mse)
         print("mse_tp1 and mse_tp2 are:", mse_tp1, mse_tp2)
@@ -267,6 +272,7 @@ if __name__ == '__main__':
                 check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["lst"], lesion_mse=mse) #
                 mc_up(mse_tp2)
                 print("Done!")
+                status.loc[status['mseid'] == mse, 'status'] = "Done*"
             else:
                 edit_lst(mse_tp1)
                 check_after_edit_lesion(mse_tp1, mse_tp2, outdir, 5050, entry_types=["transform"])
@@ -274,8 +280,11 @@ if __name__ == '__main__':
                 check_before_mc_up(mse_tp2, outdir, 5050, entry_types=["transform"], lesion_mse=mse) #
                 mc_up(mse_tp2)
                 print("Done!")
+                status.loc[status['mseid'] == mse_tp1, 'status'] = "Done"
         else:
             print("Either mse_tp1 or mse_tp2 is empty, or both of them are empty:", mse_tp1, mse_tp2)
+
+        status.to_csv(os.path.join('/data/henry7/james/antje_cohort/', 'check_lesion_reg.csv'))
 
 
 
